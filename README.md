@@ -15,7 +15,7 @@ A Nokia team member will provide you with a sheet of paper that contains:
 - URL of this repo
 
 > <p style="color:red">!!! Make sure to backup any code, config, ... <u> offline (e.g on your laptop)</u>. 
-> The VM instances might be destroyed once the hackathon is concluded.</p>
+> The VM instances might be destroyed once the Workshop is concluded.</p>
 
 ## The projects
 
@@ -35,7 +35,7 @@ Each pre-provided project comes with a README of it's own, please click the pre-
 | [SR Linux JSON-RPC with Ansible](./srl-ansible-lab/) | ## |
 
 ### Deploying a project
-When accessing your hackathon VM instance you'll see the following bootstrapped environment.
+When accessing your Workshop VM instance you'll see the following bootstrapped environment.
 The DCFPartnerHackathon directory is a git clone of this repository.
 
 ``` 
