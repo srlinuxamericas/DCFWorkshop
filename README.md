@@ -31,7 +31,7 @@ Each pre-provided project comes with a README of it's own, please click the pre-
 | Link to pre-provided project | Difficulty |
 | --- | --- |
 | [Standard SR Linux](./srl-generic-lab/) | # |
-| [SR Linux Streaming Telemetry & NDK](./srl-telemetry-ndk-lab/) | ## |
+| [SR Linux Streaming Telemetry](./srl-telemetry-lab/) | ## |
 | [SR Linux JSON-RPC with Ansible](./srl-ansible-lab/) | ## |
 
 ### Deploying a project
