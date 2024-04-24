@@ -40,7 +40,7 @@ sudo clab deploy -c -t srl-generic.clab.yml
 
 In this lab, you may choose to build out the fabric from scratch or explore a fabric that will fully configured.
 
-If you choose to build from scratch, you will find step-by-step SRLinux configuration examples on this page. The hosts are auto configured.
+If you choose to build from scratch, you will find step-by-step SRLinux configuration examples at [Step-by-Step Guide](./step-by-step-guide/README.md)
 
 The default setting is to build from scratch. If you choose to explore a configured fabric, please uncomment the line for the startup-config in the containerlab topology file `srl-generic.clab.yml` for all 6 nodes.
 
@@ -61,119 +61,7 @@ To access host h1:
 sudo docker exec -it clab-srl-generic-h1 bash
 ```
 
-## Configuring & Exploring SR Linux
-
-### Configure underlay
-
-Underlay Connectivity:
-
-![image](underlay.jpg)
-
-#### Configure System IP
-```
-/interface system0 admin-state enable subinterface 0 ipv4 admin-state enable address 10.0.0.1/32
-```
-
-#### Configure Loopback
-```
-/interface lo1 admin-state enable subinterface 1 ipv4 admin-state enable address 100.100.100.100/32
-```
-
-#### Configure Leaf-Spine links
-```
-/interface ethernet-1/31 admin-state enable vlan-tagging true
-/interface ethernet-1/31 subinterface 1 ipv4 admin-state enable address 100.64.1.0/31
-/interface ethernet-1/31 subinterface 1 vlan encap single-tagged vlan-id 1
-```
-
-#### Configure Host L2 link
-```
-/interface ethernet-1/11 admin-state enable ethernet port-speed 10G
-/interface ethernet-1/11 subinterface 1 type bridged
-```
-
-#### Configure Host L3 link
-```
-
-```
-
-#### Configure BFD on Leaf-Spine links
-```
-/bfd subinterface ethernet-1/31.1 admin-state enable
-/bfd subinterface ethernet-1/31.1 desired-minimum-transmit-interval 100000
-/bfd subinterface ethernet-1/31.1 required-minimum-receive 100000
-/bfd subinterface ethernet-1/31.1 detection-multiplier 3
-/bfd subinterface ethernet-1/31.1 minimum-echo-receive-interval 0
-```
-
-#### Configure irb
-
-```
-/interface irb1 admin-state enable
-/interface irb1 subinterface 1 admin-state enable ip-mtu 9000
-/interface irb1 subinterface 1 anycast-gw virtual-router-id 1
-/interface irb1 subinterface 1 ipv4 admin-state enable address 100.101.1.1/24 anycast-gw true primary
-/interface irb1 subinterface 1 ipv4 arp learn-unsolicited true
-/interface irb1 subinterface 1 ipv4 arp host-route populate static
-/interface irb1 subinterface 1 ipv4 arp host-route populate dynamic
-/interface irb1 subinterface 1 ipv4 arp evpn advertise static
-/interface irb1 subinterface 1 ipv4 arp evpn advertise dynamic
-```
-
-#### Configure underlay VRF
-
-```
-/network-instance default type default
-/network-instance default admin-state enable
-/network-instance default interface ethernet-1/31.1
-/network-instance default interface ethernet-1/32.1
-/network-instance default interface system0.0
-```
-
-#### Configure underlay BGP
-
-```
-/network-instance default protocols bgp admin-state enable
-/network-instance default protocols bgp autonomous-system 64601
-/network-instance default protocols bgp router-id 10.0.0.1
-/network-instance default protocols bgp afi-safi evpn evpn rapid-update true
-/network-instance default protocols bgp afi-safi ipv4-unicast admin-state enable
-/network-instance default protocols bgp afi-safi ipv4-unicast multipath allow-multiple-as true
-/network-instance default protocols bgp afi-safi ipv4-unicast multipath max-paths-level-1 64
-
-/network-instance default protocols bgp group ebgp-underlay failure-detection enable-bfd true
-/network-instance default protocols bgp group ebgp-underlay failure-detection fast-failover true
-
-/network-instance default protocols bgp neighbor 100.64.1.1 admin-state enable
-/network-instance default protocols bgp neighbor 100.64.1.1 peer-as 65177
-/network-instance default protocols bgp neighbor 100.64.1.1 peer-group ebgp-underlay
-/network-instance default protocols bgp neighbor 100.64.1.5 admin-state enable
-/network-instance default protocols bgp neighbor 100.64.1.5 peer-as 65177
-/network-instance default protocols bgp neighbor 100.64.1.5 peer-group ebgp-underlay
-```
-
-#### Configure BGP Policy for underlay
-
-```
-/routing-policy prefix-set loopbacks prefix 10.0.0.0/24 mask-length-range 32..32
-
-/routing-policy policy export-to-underlay default-action policy-result reject
-/routing-policy policy export-to-underlay statement 20 match prefix-set loopbacks
-/routing-policy policy export-to-underlay statement 20 action policy-result accept
-/routing-policy policy export-to-underlay statement 30 match protocol bgp
-/routing-policy policy export-to-underlay statement 30 match family [ ipv4-unicast ]
-/routing-policy policy export-to-underlay statement 30 action policy-result accept
-
-/routing-policy policy import-from-underlay default-action policy-result reject
-/routing-policy policy import-from-underlay statement 20 match prefix-set loopbacks
-/routing-policy policy import-from-underlay statement 20 action policy-result accept
-/routing-policy policy import-from-underlay statement 30 match protocol bgp
-/routing-policy policy import-from-underlay statement 30 match family [ ipv4-unicast ]
-/routing-policy policy import-from-underlay statement 30 action policy-result accept
-
-/network-instance default protocols bgp group ebgp-underlay export-policy export-to-underlay
-/network-instance default protocols bgp group ebgp-underlay import-policy import-from-underlay
-```
+## Exploring SR Linux
 
 ### Explore the underlay configuration
 
@@ -228,51 +116,6 @@ EVPN uses MP-BGP as a control plane protocol between the tunnel endpoints. Typic
 
 ![pic](https://gitlab.com/rdodin/pics/-/wikis/uploads/0afc55fdadc2c0e5522e3503b70d0cc2/image.png)
 
-#### Configure BGP for overlay
-
-Use AS65501 as AS on both leaf and spine
-
-```
-/network-instance default protocols bgp group ibgp-evpn export-policy export-all
-/network-instance default protocols bgp group ibgp-evpn import-policy import-all
-/network-instance default protocols bgp group ibgp-evpn peer-as 65501
-/network-instance default protocols bgp group ibgp-evpn failure-detection enable-bfd true
-/network-instance default protocols bgp group ibgp-evpn failure-detection fast-failover true
-/network-instance default protocols bgp group ibgp-evpn afi-safi evpn admin-state enable
-/network-instance default protocols bgp group ibgp-evpn afi-safi ipv4-unicast admin-state disable
-/network-instance default protocols bgp group ibgp-evpn local-as as-number 65501
-
-/network-instance default protocols bgp neighbor 10.0.0.5 admin-state enable
-/network-instance default protocols bgp neighbor 10.0.0.5 peer-group ibgp-evpn
-/network-instance default protocols bgp neighbor 10.0.0.5 transport local-address 10.0.0.1
-/network-instance default protocols bgp neighbor 10.0.0.6 admin-state enable
-/network-instance default protocols bgp neighbor 10.0.0.6 peer-group ibgp-evpn
-/network-instance default protocols bgp neighbor 10.0.0.6 transport local-address 10.0.0.1
-```
-
-#### Configure BGP policy for overlay
-
-```
-/routing-policy policy export-all default-action
-/routing-policy policy export-all default-action policy-result accept
-
-/routing-policy policy import-all default-action
-/routing-policy policy import-all default-action policy-result accept
-
-/network-instance default protocols bgp group ibgp-evpn export-policy export-all
-/network-instance default protocols bgp group ibgp-evpn import-policy import-all
-```
-
-Connect to the spine nodes and check RR configuration and iBGP EVPN sessions across the data center fabric.
-
-#### Configure RR on Spines
-
-```
-/network-instance default protocols bgp group ibgp-evpn next-hop-self false
-/network-instance default protocols bgp group ibgp-evpn route-reflector client true
-/network-instance default protocols bgp group ibgp-evpn route-reflector cluster-id 10.0.0.5
-```
-
 Some useful commands:
 
 - `show network-instance default protocols bgp neighbor 10.0.0.5 advertised-routes evpn`
@@ -290,55 +133,6 @@ Connect to the SR Linux nodes to check the EVPN service building blocks; IP-VRF 
 Have a look at the overlay topology and how different VRF types are mapped:
 
 ![image](https://gitlab.com/rdodin/pics/-/wikis/uploads/b60a887995e199a4ca373657628ac486/image.png)
-
-#### Configure VxLAN Interface
-
-```
-/tunnel-interface vxlan1 vxlan-interface 1000 type routed
-/tunnel-interface vxlan1 vxlan-interface 1000 ingress
-/tunnel-interface vxlan1 vxlan-interface 1000 ingress vni 1000
-
-/tunnel-interface vxlan1 vxlan-interface 1001 type bridged
-/tunnel-interface vxlan1 vxlan-interface 1001 ingress
-/tunnel-interface vxlan1 vxlan-interface 1001 ingress vni 1001
-```
-
-#### Configure MAC-VRF (L2 EVPN)
-
-```
-/network-instance mac-vrf-1 type mac-vrf
-/network-instance mac-vrf-1 admin-state enable
-/network-instance mac-vrf-1 interface ethernet-1/11.1
-/network-instance mac-vrf-1 interface irb1.1
-/network-instance mac-vrf-1 vxlan-interface vxlan1.1001
-/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 admin-state enable
-/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 vxlan-interface vxlan1.1001
-/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 evi 1001
-/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 ecmp 4
-/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 routes bridge-table next-hop use-system-ipv4-address
-/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 routes bridge-table mac-ip
-/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 routes bridge-table mac-ip advertise true
-/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 routes bridge-table inclusive-mcast
-/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 routes bridge-table inclusive-mcast advertise true
-/network-instance mac-vrf-1 protocols bgp-vpn bgp-instance 1 route-target export-rt target:65501:1001
-/network-instance mac-vrf-1 protocols bgp-vpn bgp-instance 1 route-target import-rt target:65501:1001
-```
-
-#### Configure IP-VRF (L3 EVPN)
-
-```
-/network-instance ip-vrf-1 type ip-vrf
-/network-instance ip-vrf-1 admin-state enable
-/network-instance ip-vrf-1 interface irb1.1
-/network-instance ip-vrf-1 interface lo1.1
-/network-instance ip-vrf-1 vxlan-interface vxlan1.1000
-/network-instance ip-vrf-1 protocols bgp-evpn bgp-instance 1 admin-state enable
-/network-instance ip-vrf-1 protocols bgp-evpn bgp-instance 1 vxlan-interface vxlan1.1000
-/network-instance ip-vrf-1 protocols bgp-evpn bgp-instance 1 evi 1000
-/network-instance ip-vrf-1 protocols bgp-evpn bgp-instance 1 ecmp 4
-/network-instance ip-vrf-1 protocols bgp-vpn bgp-instance 1 route-target export-rt target:65501:1000
-/network-instance ip-vrf-1 protocols bgp-vpn bgp-instance 1 route-target import-rt target:65501:1000
-```
 
 Some useful commands:
 
