@@ -67,7 +67,7 @@ sudo docker exec -it clab-srl-generic-h1 bash
 
 Underlay Connectivity:
 
-
+![image](/underlay.jpg)
 
 #### Configure System IP
 ```
