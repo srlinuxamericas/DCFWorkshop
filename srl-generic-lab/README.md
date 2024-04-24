@@ -128,7 +128,45 @@ Underlay Connectivity:
 #### Configure Underlay BGP
 
 ```
+/network-instance default protocols bgp admin-state enable
+/network-instance default protocols bgp autonomous-system 64601
+/network-instance default protocols bgp router-id 10.0.0.1
+/network-instance default protocols bgp afi-safi evpn evpn rapid-update true
+/network-instance default protocols bgp afi-safi ipv4-unicast admin-state enable
+/network-instance default protocols bgp afi-safi ipv4-unicast multipath allow-multiple-as true
+/network-instance default protocols bgp afi-safi ipv4-unicast multipath max-paths-level-1 64
+/network-instance default protocols bgp route-advertisement rapid-withdrawal true
+/network-instance default protocols bgp route-advertisement wait-for-fib-install true
 
+/network-instance default protocols bgp group ebgp-underlay failure-detection enable-bfd true
+/network-instance default protocols bgp group ebgp-underlay failure-detection fast-failover true
+/network-instance default protocols bgp group ebgp-underlay timers connect-retry 10
+/network-instance default protocols bgp group ebgp-underlay timers hold-time 3
+/network-instance default protocols bgp group ebgp-underlay timers keepalive-interval 1
+/network-instance default protocols bgp group ebgp-underlay timers minimum-advertisement-interval 1
+```
+
+#### Configure BGP Policy
+
+```
+/routing-policy prefix-set loopbacks prefix 10.0.0.0/24 mask-length-range 32..32
+
+/routing-policy policy export-to-underlay default-action policy-result reject
+/routing-policy policy export-to-underlay statement 20 match prefix-set loopbacks
+/routing-policy policy export-to-underlay statement 20 action policy-result accept
+/routing-policy policy export-to-underlay statement 30 match protocol bgp
+/routing-policy policy export-to-underlay statement 30 match family [ ipv4-unicast ]
+/routing-policy policy export-to-underlay statement 30 action policy-result accept
+
+/routing-policy policy import-from-underlay default-action policy-result reject
+/routing-policy policy import-from-underlay statement 20 match prefix-set loopbacks
+/routing-policy policy import-from-underlay statement 20 action policy-result accept
+/routing-policy policy import-from-underlay statement 30 match protocol bgp
+/routing-policy policy import-from-underlay statement 30 match family [ ipv4-unicast ]
+/routing-policy policy import-from-underlay statement 30 action policy-result accept
+
+/network-instance default protocols bgp group ebgp-underlay export-policy export-to-underlay
+/network-instance default protocols bgp group ebgp-underlay import-policy import-from-underlay
 ```
 
 
