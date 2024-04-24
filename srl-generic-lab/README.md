@@ -74,6 +74,11 @@ Underlay Connectivity:
 /interface system0 admin-state enable subinterface 0 ipv4 admin-state enable address 10.0.0.1/32
 ```
 
+#### Configure Loopback
+```
+/interface lo1 admin-state enable subinterface 1 ipv4 admin-state enable address 100.100.100.100/32
+```
+
 #### Configure Leaf-Spine links
 ```
 /interface ethernet-1/31 admin-state enable vlan-tagging true
@@ -283,6 +288,55 @@ Connect to the SR Linux nodes to check the EVPN service building blocks; IP-VRF 
 Have a look at the overlay topology and how different VRF types are mapped:
 
 ![image](https://gitlab.com/rdodin/pics/-/wikis/uploads/b60a887995e199a4ca373657628ac486/image.png)
+
+#### Configure VxLAN Interface
+
+```
+/tunnel-interface vxlan1 vxlan-interface 1000 type routed
+/tunnel-interface vxlan1 vxlan-interface 1000 ingress
+/tunnel-interface vxlan1 vxlan-interface 1000 ingress vni 1000
+
+/tunnel-interface vxlan1 vxlan-interface 1001 type bridged
+/tunnel-interface vxlan1 vxlan-interface 1001 ingress
+/tunnel-interface vxlan1 vxlan-interface 1001 ingress vni 1001
+```
+
+#### Configure MAC-VRF (L2 EVPN)
+
+```
+/network-instance mac-vrf-1 type mac-vrf
+/network-instance mac-vrf-1 admin-state enable
+/network-instance mac-vrf-1 interface ethernet-1/11.1
+/network-instance mac-vrf-1 interface irb1.1
+/network-instance mac-vrf-1 vxlan-interface vxlan1.1001
+/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 admin-state enable
+/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 vxlan-interface vxlan1.1001
+/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 evi 1001
+/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 ecmp 4
+/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 routes bridge-table next-hop use-system-ipv4-address
+/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 routes bridge-table mac-ip
+/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 routes bridge-table mac-ip advertise true
+/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 routes bridge-table inclusive-mcast
+/network-instance mac-vrf-1 protocols bgp-evpn bgp-instance 1 routes bridge-table inclusive-mcast advertise true
+/network-instance mac-vrf-1 protocols bgp-vpn bgp-instance 1 route-target export-rt target:65501:1001
+/network-instance mac-vrf-1 protocols bgp-vpn bgp-instance 1 route-target import-rt target:65501:1001
+```
+
+#### Configure IP-VRF (L3 EVPN)
+
+```
+/network-instance ip-vrf-1 type ip-vrf
+/network-instance ip-vrf-1 admin-state enable
+/network-instance ip-vrf-1 interface irb1.1
+/network-instance ip-vrf-1 interface lo1.1
+/network-instance ip-vrf-1 vxlan-interface vxlan1.1000
+/network-instance ip-vrf-1 protocols bgp-evpn bgp-instance 1 admin-state enable
+/network-instance ip-vrf-1 protocols bgp-evpn bgp-instance 1 vxlan-interface vxlan1.1000
+/network-instance ip-vrf-1 protocols bgp-evpn bgp-instance 1 evi 1000
+/network-instance ip-vrf-1 protocols bgp-evpn bgp-instance 1 ecmp 4
+/network-instance ip-vrf-1 protocols bgp-vpn bgp-instance 1 route-target export-rt target:65501:1000
+/network-instance ip-vrf-1 protocols bgp-vpn bgp-instance 1 route-target import-rt target:65501:1000
+```
 
 Some useful commands:
 
