@@ -115,7 +115,7 @@ Underlay Connectivity:
 /interface irb1 subinterface 1 ipv4 arp evpn advertise dynamic
 ```
 
-#### Configure Underlay VRF
+#### Configure underlay VRF
 
 ```
 /network-instance default type default
@@ -125,7 +125,7 @@ Underlay Connectivity:
 /network-instance default interface system0.0
 ```
 
-#### Configure Underlay BGP
+#### Configure underlay BGP
 
 ```
 /network-instance default protocols bgp admin-state enable
@@ -135,18 +135,19 @@ Underlay Connectivity:
 /network-instance default protocols bgp afi-safi ipv4-unicast admin-state enable
 /network-instance default protocols bgp afi-safi ipv4-unicast multipath allow-multiple-as true
 /network-instance default protocols bgp afi-safi ipv4-unicast multipath max-paths-level-1 64
-/network-instance default protocols bgp route-advertisement rapid-withdrawal true
-/network-instance default protocols bgp route-advertisement wait-for-fib-install true
 
 /network-instance default protocols bgp group ebgp-underlay failure-detection enable-bfd true
 /network-instance default protocols bgp group ebgp-underlay failure-detection fast-failover true
-/network-instance default protocols bgp group ebgp-underlay timers connect-retry 10
-/network-instance default protocols bgp group ebgp-underlay timers hold-time 3
-/network-instance default protocols bgp group ebgp-underlay timers keepalive-interval 1
-/network-instance default protocols bgp group ebgp-underlay timers minimum-advertisement-interval 1
+
+/network-instance default protocols bgp neighbor 100.64.1.1 admin-state enable
+/network-instance default protocols bgp neighbor 100.64.1.1 peer-as 65177
+/network-instance default protocols bgp neighbor 100.64.1.1 peer-group ebgp-underlay
+/network-instance default protocols bgp neighbor 100.64.1.5 admin-state enable
+/network-instance default protocols bgp neighbor 100.64.1.5 peer-as 65177
+/network-instance default protocols bgp neighbor 100.64.1.5 peer-group ebgp-underlay
 ```
 
-#### Configure BGP Policy
+#### Configure BGP Policy for underlay
 
 ```
 /routing-policy prefix-set loopbacks prefix 10.0.0.0/24 mask-length-range 32..32
@@ -168,7 +169,6 @@ Underlay Connectivity:
 /network-instance default protocols bgp group ebgp-underlay export-policy export-to-underlay
 /network-instance default protocols bgp group ebgp-underlay import-policy import-from-underlay
 ```
-
 
 ### Explore the underlay configuration
 
@@ -223,7 +223,48 @@ EVPN uses MP-BGP as a control plane protocol between the tunnel endpoints. Typic
 
 ![pic](https://gitlab.com/rdodin/pics/-/wikis/uploads/0afc55fdadc2c0e5522e3503b70d0cc2/image.png)
 
+#### Configure BGP for overlay
+
+```
+/network-instance default protocols bgp group ibgp-evpn export-policy export-all
+/network-instance default protocols bgp group ibgp-evpn import-policy import-all
+/network-instance default protocols bgp group ibgp-evpn peer-as 65501
+/network-instance default protocols bgp group ibgp-evpn failure-detection enable-bfd true
+/network-instance default protocols bgp group ibgp-evpn failure-detection fast-failover true
+/network-instance default protocols bgp group ibgp-evpn afi-safi evpn admin-state enable
+/network-instance default protocols bgp group ibgp-evpn afi-safi ipv4-unicast admin-state disable
+/network-instance default protocols bgp group ibgp-evpn local-as as-number 65501
+
+/network-instance default protocols bgp neighbor 10.0.0.5 admin-state enable
+/network-instance default protocols bgp neighbor 10.0.0.5 peer-group ibgp-evpn
+/network-instance default protocols bgp neighbor 10.0.0.5 transport local-address 10.0.0.1
+/network-instance default protocols bgp neighbor 10.0.0.6 admin-state enable
+/network-instance default protocols bgp neighbor 10.0.0.6 peer-group ibgp-evpn
+/network-instance default protocols bgp neighbor 10.0.0.6 transport local-address 10.0.0.1
+```
+
+#### Configure BGP policy for overlay
+
+```
+/routing-policy policy export-all default-action
+/routing-policy policy export-all default-action policy-result accept
+
+/routing-policy policy import-all default-action
+/routing-policy policy import-all default-action policy-result accept
+
+/network-instance default protocols bgp group ibgp-evpn export-policy export-all
+/network-instance default protocols bgp group ibgp-evpn import-policy import-all
+```
+
 Connect to the spine nodes and check RR configuration and iBGP EVPN sessions across the data center fabric.
+
+#### Configure RR on Spines
+
+```
+/network-instance default protocols bgp group ibgp-evpn next-hop-self false
+/network-instance default protocols bgp group ibgp-evpn route-reflector client true
+/network-instance default protocols bgp group ibgp-evpn route-reflector cluster-id 10.0.0.5
+```
 
 Some useful commands:
 
