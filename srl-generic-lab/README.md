@@ -36,6 +36,16 @@ Deploy the topology with containerlab.
 cd $HOME/DCFWorkshop/srl-generic-lab
 sudo clab deploy -c -t srl-generic.clab.yml
 ```
+### Configure from scratch OR Explore a ready-made fabric
+
+In this lab, you may choose to build out the fabric from scratch or explore a fabric that will fully configured.
+
+The default setting is to build from scratch. If you choose to explore a configured fabric, please uncomment the line for the startup-config in the containerlab topology file `srl-generic.clab.yml` for all 6 nodes.
+
+```
+#startup-config: configs/fabric/leaf1.cfg
+```
+
 ## Credentials & Access
 
 Once the lab is running, you can access the network elements from inside the VM through **ssh**, just passing the node name:
