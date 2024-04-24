@@ -36,29 +36,25 @@ Each pre-provided project comes with a README of it's own, please click the pre-
 
 ### Deploying a project
 When accessing your Workshop VM instance you'll see the following bootstrapped environment.
-The DCFPartnerHackathon directory is a git clone of this repository.
 
 ``` 
 ~$ ls
-DCFPartnerHackathon
+DCFWorkshop
 
-~$ cd DCFPartnerHackathon/
+~$ cd DCFWorkshop/
 
-~/DCFPartnerHackathon$ ls -1
-README.md
+~/DCFWorkshop$ ls -1
 srl-ansible-lab
 srl-generic-lab
-srl-k8s-anycast-lab
-srl-sros-gnmi-config-lab
-srl-telemetry-ndk-lab
-~/DCFPartnerHackathon$
+srl-telemetry-lab
+~/DCFWorkshop$
 ```
 
 For explanatory purposes, suppose we want to deploy the srl-generic-lab:
 
 Change directories
 ```
-cd $HOME/DCFPartnerHackathon/srl-generic-lab
+cd $HOME/DCFWorkshop/srl-generic-lab
 ```
 Execute the `containerlab deploy` command
 ```
