@@ -230,6 +230,8 @@ EVPN uses MP-BGP as a control plane protocol between the tunnel endpoints. Typic
 
 #### Configure BGP for overlay
 
+Use AS65501 as AS on both leaf and spine
+
 ```
 /network-instance default protocols bgp group ibgp-evpn export-policy export-all
 /network-instance default protocols bgp group ibgp-evpn import-policy import-all
