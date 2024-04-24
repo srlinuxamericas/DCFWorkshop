@@ -40,6 +40,8 @@ sudo clab deploy -c -t srl-generic.clab.yml
 
 In this lab, you may choose to build out the fabric from scratch or explore a fabric that will fully configured.
 
+If you choose to build from scratch, you will find step-by-step configuration examples on this page.
+
 The default setting is to build from scratch. If you choose to explore a configured fabric, please uncomment the line for the startup-config in the containerlab topology file `srl-generic.clab.yml` for all 6 nodes.
 
 ```
