@@ -33,7 +33,7 @@ Hosts are connected to the respective overlay services as per the diagram below:
 Deploy the topology with containerlab.
 
 ```bash
-cd $HOME/DCFPartnerHackathon/srl-generic-lab
+cd $HOME/DCFWorkshop/srl-generic-lab
 sudo clab deploy -c -t srl-generic.clab.yml
 ```
 ## Credentials & Access
@@ -41,57 +41,13 @@ sudo clab deploy -c -t srl-generic.clab.yml
 Once the lab is running, you can access the network elements from inside the VM through **ssh**, just passing the node name:
 ```
 ssh admin@clab-srl-generic-leaf1
-```
-
-You can also access the nodes remotely hosts using the DNS name of a VM and the port numbers assigned to the respective services - **except for hosts h1 to h4** which are not configured for that type of access.
-
-To get the list of ports allocated by containerlab:
-
-```bash
-# example of show-ports output
-# note, that the port numbers can be different in your case
-$ show-ports
-NAMES                     PORTS
-clab-srl-generic-leaf3    50021->22/tcp, 50021->22/tcp, 50020->80/tcp, 50020->80/tcp, 50018->57400/tcp, 50018->57400/tcp
-clab-srl-generic-leaf4    50019->22/tcp, 50019->22/tcp, 50017->80/tcp, 50017->80/tcp, 50016->57400/tcp, 50016->57400/tcp
-clab-srl-generic-h3       80/tcp, 443/tcp, 50008->22/tcp, 50008->22/tcp
-clab-srl-generic-leaf1    50009->22/tcp, 50009->22/tcp, 50004->80/tcp, 50004->80/tcp, 50001->57400/tcp, 50001->57400/tcp
-clab-srl-generic-spine1   50007->22/tcp, 50007->22/tcp, 50003->80/tcp, 50003->80/tcp, 50000->57400/tcp, 50000->57400/tcp
-clab-srl-generic-h2       80/tcp, 443/tcp, 50013->22/tcp, 50013->22/tcp
-clab-srl-generic-h4       80/tcp, 443/tcp, 50002->22/tcp, 50002->22/tcp
-clab-srl-generic-leaf2    50014->22/tcp, 50014->22/tcp, 50010->80/tcp, 50010->80/tcp, 50005->57400/tcp, 50005->57400/tcp
-clab-srl-generic-spine2   50015->22/tcp, 50015->22/tcp, 50012->80/tcp, 50012->80/tcp, 50006->57400/tcp, 50006->57400/tcp
-clab-srl-generic-h1       80/tcp, 443/tcp, 50011->22/tcp, 50011->22/tcp
-
-```
-
-Each service exposed on a lab node gets a unique external port number as per the table above. For example, SSH of leaf1 is available on port `50009` of the VM and is mapped to leaf1's internal port of `22`.
-
-Some well-known port numbers:
-
-| Service | Internal Port number |
-| ------- | -------------------- |
-| SSH     | 22                   |
-| gNMI    | 57400                |
-| HTTP/JSON-RPC    | 80/443               |
-
-Imagine you are assigned a VM with an address `g1.dcfpartnerws.net` and the `show-ports` command matches the output above; then you can access `leaf1` SSH via Internet with the following command:
-
-```bash
 # password: NokiaSrl1!
-ssh -p 50009 admin@g1.dcfpartnerws.net
 ```
-
 To access host h1:
-
-```bash
+```
 # password: srllabs@123
 sudo docker exec -it clab-srl-generic-h1 bash
 ```
-
-In alternative you can directly attach a shell session to the host h1 from the Docker Extension of your WEB based IDE:
-
-<img src="images/access_docker_extension.png" width="350" height="300" />
 
 ## Exploring SR Linux
 
