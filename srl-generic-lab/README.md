@@ -36,11 +36,11 @@ Deploy the topology with containerlab.
 cd $HOME/DCFWorkshop/srl-generic-lab
 sudo clab deploy -c -t srl-generic.clab.yml
 ```
-### Configure from scratch OR Explore a ready-made fabric
+### Configure from scratch or Explore a ready-made fabric
 
 In this lab, you may choose to build out the fabric from scratch or explore a fabric that will fully configured.
 
-If you choose to build from scratch, you will find step-by-step configuration examples on this page.
+If you choose to build from scratch, you will find step-by-step SRLinux configuration examples on this page. The hosts are auto configured.
 
 The default setting is to build from scratch. If you choose to explore a configured fabric, please uncomment the line for the startup-config in the containerlab topology file `srl-generic.clab.yml` for all 6 nodes.
 
@@ -61,7 +61,76 @@ To access host h1:
 sudo docker exec -it clab-srl-generic-h1 bash
 ```
 
-## Exploring SR Linux
+## Configuring & Exploring SR Linux
+
+### Configure underlay
+
+Underlay Connectivity:
+
+
+
+#### Configure System IP
+```
+/interface system0 admin-state enable subinterface 0 ipv4 admin-state enable address 10.0.0.1/32
+```
+
+#### Configure Leaf-Spine links
+```
+/interface ethernet-1/31 admin-state enable vlan-tagging true
+/interface ethernet-1/31 subinterface 1 ipv4 admin-state enable address 100.64.1.0/31
+/interface ethernet-1/31 subinterface 1 vlan encap single-tagged vlan-id 1
+```
+
+#### Configure Host L2 link
+```
+/interface ethernet-1/11 admin-state enable ethernet port-speed 10G
+/interface ethernet-1/11 subinterface 1 type bridged
+```
+
+#### Configure Host L3 link
+```
+
+```
+
+#### Configure BFD on Leaf-Spine links
+```
+/bfd subinterface ethernet-1/31.1 admin-state enable
+/bfd subinterface ethernet-1/31.1 desired-minimum-transmit-interval 100000
+/bfd subinterface ethernet-1/31.1 required-minimum-receive 100000
+/bfd subinterface ethernet-1/31.1 detection-multiplier 3
+/bfd subinterface ethernet-1/31.1 minimum-echo-receive-interval 0
+```
+
+#### Configure irb
+
+```
+/interface irb1 admin-state enable
+/interface irb1 subinterface 1 admin-state enable ip-mtu 9000
+/interface irb1 subinterface 1 anycast-gw virtual-router-id 1
+/interface irb1 subinterface 1 ipv4 admin-state enable address 100.101.1.1/24 anycast-gw true primary
+/interface irb1 subinterface 1 ipv4 arp learn-unsolicited true
+/interface irb1 subinterface 1 ipv4 arp host-route populate static
+/interface irb1 subinterface 1 ipv4 arp host-route populate dynamic
+/interface irb1 subinterface 1 ipv4 arp evpn advertise static
+/interface irb1 subinterface 1 ipv4 arp evpn advertise dynamic
+```
+
+#### Configure Underlay VRF
+
+```
+/network-instance default type default
+/network-instance default admin-state enable
+/network-instance default interface ethernet-1/31.1
+/network-instance default interface ethernet-1/32.1
+/network-instance default interface system0.0
+```
+
+#### Configure Underlay BGP
+
+```
+
+```
+
 
 ### Explore the underlay configuration
 
