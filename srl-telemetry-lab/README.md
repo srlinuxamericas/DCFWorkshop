@@ -31,59 +31,6 @@ sudo containerlab destroy --cleanup
 
 To redeploy the lab use the same deployment command as above.
 
-## Accessing the lab nodes
-
-Once the lab has been deployed, you can access the network elements and telemetry applications using the DNS name of a VM and the port numbers assigned to the lab's services.
-
-To get the list of ports allocated by containerlab, use the following command:
-
-```bash
-$ show-ports
-NAMES                PORTS
-clab-st-gnmic
-clab-st-client2      22/tcp 80/tcp 443/tcp 1180/tcp 11443/tcp
-clab-st-spine2       50093->22/tcp 50092->57400/tcp
-clab-st-spine1       50091->22/tcp 50090->57400/tcp
-clab-st-leaf1        50089->22/tcp 50088->57400/tcp
-clab-st-grafana      3000->3000/tcp
-clab-st-syslog       6514/tcp 5514/udp 6601/tcp
-clab-st-loki         50087->3100/tcp
-clab-st-leaf2        50084->22/tcp 50083->57400/tcp
-clab-st-prometheus   50082->9090/tcp
-clab-st-client1      22/tcp 80/tcp 443/tcp 1180/tcp 11443/tcp
-clab-st-client3      22/tcp 80/tcp 443/tcp 1180/tcp 11443/tcp
-clab-st-leaf3        50086->22/tcp 50085->57400/tcp
-clab-st-promtail
-
-```
-
-Each service exposed on a lab node gets a unique external port number as per the table above. For example, Prometheus's web interface is available on port `50082` of the VM and is mapped to Prometheus's node internal port of `9090`.
-
-Some well-known port numbers:
-
-| Service    | Internal Port number |
-| ---------- | -------------------- |
-| SSH        | 22                   |
-| Netconf    | 830                  |
-| gNMI       | 57400                |
-| HTTP/HTTPS | 80/443               |
-| Grafana    | 3000                 |
-
-So imagine you are assigned a VM with address `gX.dcfpartnerws.net` and the `show-ports` command matches the output above; then you can access `leaf1` via Internet with the following command:
-
-```bash
-ssh -p 50034 admin@gX.dcfpartnerws.net
-```
-
-For Grafana, we made the external port to be static as 3000 (native Grafana port) so that it can be accessible as well from VSCode interface. However, it can be accessed by pasting `gX.dcfpartnerws.net:3000` in your browser.
-
-For lab nodes that don't have a web management interface or an SSH server, use `docker exec` to access the node's shell executed from a VM.
-
-```bash
-# to access the client nodes
-sudo docker exec -it clab-st-client1 bash
-```
-
 ## Fabric configuration
 
 The DC fabric used in this lab consists of three leaves and two spines interconnected as shown in the diagram.
