@@ -2,9 +2,7 @@
 
 This lab represents a small Clos fabric with [Nokia SR Linux](https://learn.srlinux.dev/) switches running as containers. The lab topology consists of a network fabric, plus a Streaming Telemetry stack comprised of [gnmic](https://gnmic.openconfig.net), prometheus and grafana applications.
 
-As part of this Lab, a custom NDK application is installed on Leaf1. This application is a simple GIT client used to save the device configuration in a git repository. The NDK application has specific configuration and state elements exposed in SR Linux CLI and gNMI interfaces.
-
-![pic1](images/lab_setup.png)
+![pic1]((https://gitlab.com/rdodin/pics/-/wikis/uploads/0784c31d48ec18fd24111ad8d73478b0/image.png))
 
 In addition to the telemetry stack, the lab also includes a modern logging stack based on Grafana Labs [Promtail](https://grafana.com/docs/loki/latest/clients/promtail/) and [loki](https://grafana.com/oss/loki/).
 
@@ -18,7 +16,7 @@ The lab is deployed with the [containerlab](https://containerlab.dev) project, w
 
 ```bash
 # change into the lab directory
-cd $HOME/DCFPartnerHackathon/srl-telemetry-ndk-lab
+cd $HOME/DCFWorkshop/srl-telemetry-lab
 # and execute
 sudo containerlab deploy --reconfigure
 ```
@@ -62,30 +60,6 @@ Flags: S static, D dynamic, L discovered by LLDP, B BFD enabled, - disabled, * s
 | default   | 192.168.12.1  | eBGP          | S     | 202      | established | 0d:0h:0m:33s | ipv4-unicast | [3/3/4]       |
 +-----------+---------------+---------------+-------+----------+-------------+--------------+--------------+---------------+
 ```
-
-### Verifying NDK agent status
-
-You can check the state of the NDK agent by executing an ***info from state git-client***
-
-```
-A:leaf1# info from state git-client  
-    git-client {
-        organization ""
-        owner srlinuxeurope
-        repo srl-lab-config-store
-        filename leaf1-config.json
-        author "srlinux demo user"
-        author-email srlinux.europe@gmail.com
-        branch g10-branch
-        oper-state up
-        statistics {
-            success 0
-            failure 0
-        }
-    }
-```
-
-
 
 ## Telemetry stack
 
@@ -185,7 +159,7 @@ Adjust the `gnmic` config to collect statistics for the `mgmt0` interface such t
 > **Note** 
 > When you are done with the gnmic config. you need to restart the deployment:
 
->`cd $HOME/DCFPartnerHackathon/srl-telemetry-ndk-lab` <br>
+>`cd $HOME/DCFWorkshop/srl-telemetry-lab` <br>
 >`sudo clab deploy --reconfigure`
 
 ### 4. Fix routing stats panel
@@ -200,134 +174,10 @@ The panel displayed the number of active, total and active ECMP'ed routes for IP
 
 After fixing the gnmic configuration file - [gnmic-config.yml](gnmic-config.yml) you must restart the containerlab deployment:
 
->`cd $HOME/DCFPartnerHackathon/srl-telemetry-ndk-lab` <br>
+>`cd $HOME/DCFWorkshop/srl-telemetry-lab` <br>
 >`sudo clab deploy --reconfigure`
 
 You can then fix the grafana dashboard by logging in with admin/admin
 
 >**Note:**
 > use as reference the existing BGP Peering Stats panel
-
-
-### 5. Add a new panel with a NDK Git agent stats
-
-If you completed the tasks above, or they weren't your cup of tea, you can add a new panel to the dashboard with the custom NDK git-client stats.
-
-<img src="images/ndk_panel.png" width="180" height="300" />
-
-> **Note**  
-> The gnmic config is already done:
-```
-  srl_ndk_app:
-    paths:
-      - /git-client/statistics
-    mode: stream
-    stream-mode: sample
-    sample-interval: 5s
-
-```
-> You just need to update the grafana dashboard and include the new panel.
-
-
-### 6. NDK Agent -  Save the config. in the Git Repository
-
-You can commit the leaf1 config. into git
-
-SSH to leaf1:
-```
-ssh -l admin clab-st-leaf1
-password is: admin
-``````
-
-On Leaf1 execute:
-```
-tools git commit "g1 commit"
-```
-
-Check in the gitlab repository that the configuration was saved under a dedicated branch for your group:
-
-<https://github.com/srlinuxeurope/srl-lab-config-store/branches>
-
-Verify in the newly added grafana panel that the success actions counter get updated:
-
-<img src="images/ndk_panel_stats.png" width="180" height="300" />
-
-
-### 7. Install a new CLI plugin to provide aditional CLI commands
-
-As a last challange for this lab. we propose the instalation of a CLI plugin to provide aditional CLI reports.
-
-On Leaf1 execute:
-
-```
-A:leaf1# bash
-[admin@leaf1 ~]$ sudo rpm -ivh srl-cli-plugins-1-0.noarch.rpm 
-Verifying...                          ################################# [100%]
-Preparing...                          ################################# [100%]
-Updating / installing...
-   1:srl-cli-plugins-1-0              ################################# [100%]
-```
-
-Initiate a new CLI session from the bash:
-```
-[admin@leaf1 ~]$ sr_cli
-Using configuration file(s): []
-Welcome to the srlinux CLI.
-Type 'help' (and press <ENTER>) if you need any help using this.
---{ + running }--[  ]--
-A:leaf1#  
-```
-
-Verify that there're new CLI root commands show ***Demo*** & show ***health***:
-```
-A:leaf1# show Demo  
-  usage: Demo
-
-  Local commands:
-    hello             Show Demo greeting
-    sysinfo           Show Demo system information
-
-A:leaf1# show health local 
-  usage: health
-
-  Show health of this node
-
-  Local commands:
-    local             shows local device health status
-```
-The show ***health local*** report is collecting the state of the Uplinks, Power Suplies, FANs and TCAM.
-
-```
-A:leaf1# show health local  
------------------------------------------
-Status: Summary of device heatlh
------------------------------------------
-+---------+-------+------+------+
-| Uplinks | Power | Fans | TCAM |
-+=========+=======+======+======+
-| OK      | OK    | OK   | OK   |
-+---------+-------+------+------+
------------------------------------------
-```
-
-Try to disable one of the uplink interfaces in Leaf1 and re-run the show health local
-
-### 8. Change the ***'show Demo hello'*** message
-
-Enter in the SR Linux bash, and change the corresponding CLI report python file:
-````
-A:leaf1# bash
-[admin@leaf1 ~]$ sudo vi /opt/srlinux/python/virtual-env/lib/python3.6/site-packages/srlinux/mgmt/cli/plugins/reports/demo.py
-````
-
-Start a new CLI session from the bash and check the ***show Demo hello*** output:
-```
-admin@leaf1 ~]$ sr_cli
-Using configuration file(s): []
-Welcome to the srlinux CLI.
-Type 'help' (and press <ENTER>) if you need any help using this.
---{ + running }--[  ]--
-A:leaf1# show  Demo hello  
-Welcome to the SR Linux Partner! This is G1 Demo!
-``````
-
