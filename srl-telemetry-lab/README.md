@@ -1,4 +1,4 @@
-# Nokia SR Linux Streaming Telemetry & NDK Lab
+# Nokia SR Linux Streaming Telemetry Lab
 
 This lab represents a small Clos fabric with [Nokia SR Linux](https://learn.srlinux.dev/) switches running as containers. The lab topology consists of a network fabric, plus a Streaming Telemetry stack comprised of [gnmic](https://gnmic.openconfig.net), prometheus and grafana applications.
 
