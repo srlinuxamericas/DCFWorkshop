@@ -81,7 +81,7 @@ The gnmic configuration file - [gnmic-config.yml](gnmic-config.yml) - is applied
 
 [Prometheus](https://prometheus.io) is a popular open-source time-series database. It is used in this lab to store the telemetry data exported by gnmic. The prometheus configuration file - [configs/prometheus/prometheus.yml](configs/prometheus/prometheus.yml) - has a minimal configuration and instructs prometheus to scrape the data from the gnmic collector with a 5s interval.
 
-Since Prometheus stores all the metrics collected by gNMIc it is quite useful to have a way to explore the collected data. Prometheus provides a web interface that can be accessed via the over internal port `9090`. Use `show-ports` command to identify the external port mapped to prometheus' internal port.
+Since Prometheus stores all the metrics collected by gNMIc it is quite useful to have a way to explore the collected data.
 
 ### Grafana
 
@@ -137,7 +137,7 @@ The telemetry pipeline used in this lab can be depicted as follows:
 [network nodes] <--gNMI-- [gnmic] <--scrape-- [prometheus] <--query-- [grafana]
 ```
 
-Prometheus acts as a database for the collected telemetry data. It is accessible via the web interface (internal port `9090`) of the `prometheus` node and can be used to explore the collected metrics. Your next step might be to explore the collected metrics in Prometheus through its Web UI to see which metrics and values Prometheus scraped from gnmic. The metric names are crucial to understanding how data is fetched; make sure it is clear how they are formed.
+Prometheus acts as a database for the collected telemetry data.
 
 ### 3. Collect `mgmt0` interface statistics
 
