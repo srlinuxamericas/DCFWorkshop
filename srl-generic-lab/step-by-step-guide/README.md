@@ -54,15 +54,17 @@ Underlay Connectivity:
 /interface ethernet-1/31 subinterface 1 vlan encap single-tagged vlan-id 1
 ```
 
-#### Configure Host L2 link
+#### Configure Host Layer 2 link
+If the host is connected to a MAC-VRF on the leaf, use the below commands on the leaf to configure the port as Layer 2.
 ```
 /interface ethernet-1/11 admin-state enable ethernet port-speed 10G
 /interface ethernet-1/11 subinterface 1 type bridged
 ```
 
-#### Configure Host L3 link
+#### Configure Host Layer 3 link
+If the host is connected to a IP-VRF on the leaf, use the below command on the leaf to configure the port as Layer 3.
 ```
-
+/interface ethernet-1/12 subinterface 1 ipv4 admin-state enable address 100.102.2.1/31
 ```
 
 #### Configure BFD on Leaf-Spine links
