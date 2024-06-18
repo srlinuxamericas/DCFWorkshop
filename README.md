@@ -13,6 +13,7 @@ A Nokia team member will provide you with a sheet of paper that contains:
 - your group and VM ID
 - SSH credentials to the VM instance
 - URL of this repo
+- THIS IS DREWS ADDITION
 
 > <p style="color:red">!!! Make sure to backup any code, config, ... <u> offline (e.g on your laptop)</u>. 
 > The VM instances might be destroyed once the Workshop is concluded.</p>
