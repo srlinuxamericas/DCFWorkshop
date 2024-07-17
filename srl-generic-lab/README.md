@@ -103,12 +103,14 @@ As Table:
 These commands can be associated to CLI Aliases
 
 -`environment alias mybgp "info from state network-instance default protocols bgp neighbor * | filter fields admin-state session-state | as table"`
+
 -`mybgp`
 
 These CLI Aliases can receive inputs so that the neighbor can be dynamically selected (dynamic aliases)
 
 -`environment alias mybgp "info from state network-instance default protocols bgp neighbor {} | filter fields admin-state session-state | as table"`
--`mybgp mybgp 10.0.0.5`
+
+-`mybgp 10.0.0.5`
 
 ### iBGP EVPN as Network Virtualization Overlay
 
