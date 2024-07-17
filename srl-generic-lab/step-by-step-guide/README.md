@@ -31,6 +31,14 @@ sudo docker exec -it clab-srl-generic-h1 bash
 
 ## Configuring SR Linux
 
+### Entering Candidate Edit mode
+
+When logging into SR Linux, the default mode is `running` and does not allow to make configuration changes.
+
+To change into configuration edit mode, run `enter candidate`.
+
+After making the configuration changes, run `commit now` to commit and save your changes.
+
 ### Configure underlay
 
 Underlay Connectivity:
